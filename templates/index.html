@@ -2,33 +2,98 @@
 <html>
 <head>
     <title>Accident Severity Detection</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background: white;
+            width: 60%;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        button {
+            background-color: #ff4b5c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #e63e4d;
+        }
+
+        img {
+            margin-top: 20px;
+            border-radius: 10px;
+            border: 3px solid #333;
+        }
+
+        .result {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .result h3 {
+            color: #444;
+        }
+
+        .highlight {
+            color: #ff4b5c;
+            font-weight: bold;
+        }
+
+    </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h1>Accident Severity Detection</h1>
+    <div class="container">
 
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <br><br>
-        <button type="submit">Predict</button>
-    </form>
+        <h2>🚑 Accident Severity Detection</h2>
 
-    {% if prediction %}
-        <div class="result">
-            <h3>Prediction: {{ prediction }}</h3>
-        </div>
-    {% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <br><br>
+            <button type="submit">Predict</button>
+        </form>
 
-    {% if recommendation %}
-        <div class="result">
-            <h3>Hospital Recommendation:</h3>
-            <p>{{ recommendation }}</p>
-        </div>
-    {% endif %}
-</div>
+        {% if uploaded_image %}
+
+            <h3>Uploaded Image</h3>
+            <img src="{{ uploaded_image }}" width="300">
+
+            <div class="result">
+                <h3>Prediction Result</h3>
+                <p><strong>Body Part:</strong> 
+                    <span class="highlight">{{ body_part }}</span></p>
+
+                <p><strong>Severity:</strong> 
+                    <span class="highlight">{{ severity }}</span></p>
+
+                <h3>Hospital Recommendation</h3>
+                <p>{{ hospital_details }}</p>
+            </div>
+
+        {% endif %}
+
+    </div>
 
 </body>
 </html>

@@ -3,49 +3,57 @@ import cv2
 import numpy as np
 import joblib
 from flask import Flask, render_template, request
-
-app = Flask(__name__)
-
-# Create upload folder if not exists
-UPLOAD_FOLDER = "static/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-IMG_SIZE = 64
-
-# Load trained model
+import os
 model = joblib.load("accident_model.pkl")
 
 
-def prepare_image(image_path):
-    img = cv2.imread(image_path)
-    img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+def predict(image_path):
+
+    img = cv2.imread(image_path)   # ✅ Load image first
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = img.flatten()   # 🔥 ADD THIS LINE
-    return img
+    img = cv2.resize(img, (64, 64))   # resize (important)
+
+    img = img.flatten()
+    img = img.reshape(1, -1)
+
+    prediction = model.predict(img)
+    body_part = prediction[0]
+
+    # Simple severity logic
+    if body_part == "head":
+        severity = "Major"
+    else:
+        severity = "Minor"
+
+    hospital_details = "City Hospital - Emergency Ward Available"
+
+    return body_part, severity, hospital_details
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    prediction = None
-    recommendation = None
 
-    if request.method == "POST":
-        if 'file' not in request.files:
-            return render_template("index.html")
+    if request.method == 'POST':
 
-        file = request.files['file']
-
-        if file.filename == "":
-            return render_template("index.html")
+        file = request.files['image']
 
         if file:
-            # your prediction logic here
-            prediction = "Major Accident"
-            recommendation = "Nearest Multi-Speciality Hospital"
+            filepath = os.path.join("static", file.filename)
+            file.save(filepath)
 
-    return render_template("index.html", prediction=prediction, recommendation=recommendation)
+            body_part, severity, hospital_details = predict(filepath)
 
+            return render_template(
+                'index.html',
+                uploaded_image=filepath,
+                body_part=body_part,
+                severity=severity,
+                hospital_details=hospital_details
+            )
+
+    return render_template('index.html')
 
 import os
 
