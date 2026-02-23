@@ -11,23 +11,29 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 def predict(image_path):
 
-    img = cv2.imread(image_path)   # ✅ Load image first
+    img = cv2.imread(image_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = cv2.resize(img, (64, 64))   # resize (important)
+    img = cv2.resize(img, (64, 64))
 
     img = img.flatten()
     img = img.reshape(1, -1)
 
     prediction = model.predict(img)
-    body_part = prediction[0]
 
-    # Simple severity logic
-    if body_part == "head":
+    print("Raw prediction:", prediction)
+
+    body_part = prediction[0]   
+
+   
+    if body_part.lower() == "head":
         severity = "Major"
     else:
         severity = "Minor"
 
-    hospital_details = "City Hospital - Emergency Ward Available"
+    if severity == "Major":
+        hospital_details = "City Hospital - Emergency Ward Available"
+    else:
+        hospital_details = "Nearby Clinic Recommended"
 
     return body_part, severity, hospital_details
 
